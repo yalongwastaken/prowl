@@ -1,3 +1,4 @@
+package prowl;
 import java.util.*;
 
 public class Mouse extends Creature {

@@ -1,3 +1,4 @@
+package prowl;
 import java.util.Random;
 
 public abstract class Creature {

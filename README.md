@@ -1,2 +1,128 @@
-# yalongwastaken-project1
-<img width="630" alt="yalong_project1_umldiagram" src="https://github.com/yalongwastaken/yalongwastaken-project1/assets/142839048/b1bf0075-aa69-4010-abb9-14884848a5cb">
+# Prowl
+
+A grid-based predator/prey simulation written in Java. Cats hunt mice across a city grid, zombie cats roam unpredictably, and the ecosystem evolves over configurable rounds with periodic spawning.
+
+Built as an OOP exercise exploring abstract classes, inheritance, and simulation design.
+
+## How It Works
+
+The simulation runs on a 2D city grid populated with three creature types:
+
+- **Mice** — move around the grid, reproduce, and try to survive
+- **Cats** — hunt the closest mouse, eat them, and die if they go too long without eating
+- **Zombie Cats** — move erratically and can't be reasoned with
+
+Every N rounds a new mouse spawns. Every M rounds a new cat spawns. The simulation runs until the specified number of rounds is complete.
+
+## File Structure
+
+```
+prowl/
+├── src/
+│   ├── main/java/prowl/
+│   │   ├── Simulator.java       — entry point, parses args and runs the loop
+│   │   ├── City.java            — manages the grid, creature lists, and simulation steps
+│   │   ├── Creature.java        — abstract base class for all creatures
+│   │   ├── Cat.java             — hunts the closest mouse
+│   │   ├── Mouse.java           — moves and reproduces
+│   │   ├── GridPoint.java       — represents a position on the grid
+│   │   └── PlotterPoint.java    — maps creature position to a colored visual point
+│   └── test/java/prowl/
+│       └── Project1_Tester.java — unit tests
+├── lib/
+│   ├── Plotter.jar              — visualization tool (reads stdout)
+│   └── junit-platform-console-standalone-1.7.0-M1.jar
+├── docs/
+│   └── uml_diagram.png          — class diagram
+├── .gitignore
+└── README.md
+```
+
+## Class Structure
+
+```
+Creature (Abstract)
+├── Cat
+└── Mouse
+
+City          — manages the grid, creature lists, and simulation steps
+GridPoint     — represents a position on the grid
+Simulator     — entry point, parses args and runs the loop
+```
+
+## Prerequisites
+
+Install Java via Homebrew if you don't have it:
+
+```bash
+brew install openjdk
+sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Verify:
+
+```bash
+java -version
+javac -version
+```
+
+## Running It
+
+### Compile
+
+From the repo root:
+
+```bash
+javac -d work src/main/java/prowl/*.java
+```
+
+### Run without visualization
+
+```bash
+java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> [randSeed] [--DEBUG]
+```
+
+### Run with visualization
+
+Pipe workput into the Plotter:
+
+```bash
+java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> | java -jar lib/Plotter.jar
+```
+
+### Arguments
+
+| Argument | Description |
+|---|---|
+| `numMice` | Number of mice to start with |
+| `numCats` | Number of cats to start with |
+| `numZombieCats` | Number of zombie cats to start with |
+| `rounds` | Number of simulation rounds to run |
+| `randSeed` | Optional. Random seed for reproducibility (default: 100) |
+| `--DEBUG` | Optional. Pauses between rounds, waiting for input to continue |
+
+### Examples
+
+```bash
+# 10 mice, 3 cats, 2 zombie cats, 500 rounds with visualization
+java -cp work prowl.Simulator 10 3 2 500 | java -jar lib/Plotter.jar
+
+# Reproducible run with seed
+java -cp work prowl.Simulator 10 3 2 500 42 | java -jar lib/Plotter.jar
+
+# Step through round by round
+java -cp work prowl.Simulator 10 3 2 500 42 --DEBUG
+```
+
+## Notes
+
+- A new mouse spawns every 100 rounds
+- A new cat spawns every 25 rounds
+- Zombie cats are implemented but currently disabled in `City.java`
+- `.class` files are excluded from the repo via `.gitignore`
+
+## Status
+
+Completed coursework project (Fall 2023). Kept as an early example of Java OOP — abstract classes, inheritance, and simulation architecture.

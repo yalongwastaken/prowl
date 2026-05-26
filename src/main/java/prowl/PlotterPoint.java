@@ -1,3 +1,4 @@
+package prowl;
 import java.awt.*;
 
 public class PlotterPoint{

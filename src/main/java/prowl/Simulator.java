@@ -1,3 +1,4 @@
+package prowl;
 import java.util.Random;
 import java.util.Scanner;
 import java.io.BufferedReader;

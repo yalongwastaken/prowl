@@ -1,3 +1,4 @@
+package prowl;
 public class GridPoint extends Object{
 
     //-----------------
