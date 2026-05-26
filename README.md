@@ -28,10 +28,11 @@ prowl/
 │   │   ├── GridPoint.java       — represents a position on the grid
 │   │   └── PlotterPoint.java    — maps creature position to a colored visual point
 │   └── test/java/prowl/
-│       └── Project1_Tester.java — unit tests
+│       └── Tester.java          — unit tests
 ├── lib/
 │   ├── Plotter.jar              — visualization tool (reads stdout)
 │   └── junit-platform-console-standalone-1.7.0-M1.jar
+├── work/                        — compiled output (gitignored)
 ├── docs/
 │   └── uml_diagram.png          — class diagram
 ├── .gitignore
@@ -75,7 +76,7 @@ javac -version
 From the repo root:
 
 ```bash
-javac -d work src/main/java/prowl/*.java
+javac -cp lib/junit-platform-console-standalone-1.7.0-M1.jar -d work src/main/java/prowl/*.java src/test/java/prowl/Tester.java
 ```
 
 ### Run without visualization
@@ -86,10 +87,16 @@ java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> [rand
 
 ### Run with visualization
 
-Pipe workput into the Plotter:
+Pipe output into the Plotter:
 
 ```bash
 java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> | java -jar lib/Plotter.jar
+```
+
+### Run tests
+
+```bash
+java -cp work:lib/junit-platform-console-standalone-1.7.0-M1.jar org.junit.runner.JUnitCore Tester
 ```
 
 ### Arguments
@@ -121,7 +128,8 @@ java -cp work prowl.Simulator 10 3 2 500 42 --DEBUG
 - A new mouse spawns every 100 rounds
 - A new cat spawns every 25 rounds
 - Zombie cats are implemented but currently disabled in `City.java`
-- `.class` files are excluded from the repo via `.gitignore`
+- Compiled `.class` files go into `work/` and are excluded from the repo via `.gitignore`
+- Tests 1–5 check OOP structure via file scanning; tests 6–10 validate simulation output against expected values
 
 ## Status
 

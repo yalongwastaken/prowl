@@ -1,55 +1,65 @@
+/**
+ * @file GridPoint.java
+ * @brief Represents a position on the simulation grid.
+ *        Supports copy construction, equality, hashing, and
+ *        wrap-aware Manhattan distance calculation.
+ *
+ * Note: equals() and hashCode() must not be modified —
+ *       they are required for use as HashMap keys.
+ */
 package prowl;
-public class GridPoint extends Object{
 
-    //-----------------
-    //You get this class for free. You can edit it as you see fit for
-    //your model, but do not change equals or hashcode
-    //------------------
-    
-    //publically accessible x and y
+public class GridPoint {
+
+    // publicly accessible grid coordinates
     public int x, y;
-    
-    public GridPoint(int x, int y){
+
+    // constructor
+    public GridPoint(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-
-    //copy construtor
-    public GridPoint(GridPoint other){
+    // copy constructor
+    public GridPoint(GridPoint other) {
         this.x = other.x;
         this.y = other.y;
     }
 
-    //The following two methods let this be used as a Key in a HashMap
+    // --- equality and hashing (do not modify) ---
+
     @Override
-    public boolean equals(Object o){
-        if(this == o) return true;
-        if(!(o instanceof GridPoint)) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GridPoint)) return false;
         GridPoint other = (GridPoint) o;
         return this.x == other.x && this.y == other.y;
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return this.x * 31 + this.y;
     }
 
-    //Free two-string method prints out in (x,y) - (y,x) format
+    // --- distance ---
+
+    // returns the shorter of the direct or wraparound distance along one axis
+    private int minDist(int a, int b, int n) {
+        return Math.min(
+            Math.abs(a - b),
+            Math.min(a, b) - Math.max(a, b) + n
+        );
+    }
+
+    // returns wrap-aware Manhattan distance to another GridPoint
+    public int dist(GridPoint other) {
+        return minDist(x, other.x, City.WIDTH) + minDist(y, other.y, City.HEIGHT);
+    }
+
+    // --- display ---
+
     @Override
-    public String toString(){
-        return "("+this.y+","+this.x+")";
-    }
-
-    private int minDist(int a, int b, int n){
-        return Math.min(Math.abs(a-b), //within
-            (Math.min(a,b)-Math.max(a,b)+n)); //wraparound
-    }
-
-    //Distance to another gridPoint is the manhattan distance
-    //number of xs away + number of ys away
-    //accounts for wrapping around the edges
-    public int dist(GridPoint other){
-        return minDist(x,other.x,City.WIDTH) +  minDist(y,other.y,City.HEIGHT);
+    public String toString() {
+        return "(" + this.y + "," + this.x + ")";
     }
 }

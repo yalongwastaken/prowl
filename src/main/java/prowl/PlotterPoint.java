@@ -1,87 +1,78 @@
+/**
+ * @file PlotterPoint.java
+ * @brief Represents a single colored point on the Plotter canvas.
+ *        Maps a creature's char color label to a Java AWT Color and
+ *        handles both solid and trailing (translucent) rendering.
+ */
 package prowl;
-import java.awt.*;
 
-public class PlotterPoint{
-    Point point;
-    Dimension dimension;
-    Color color;
-    final int alpha=64;
-    public final static int POINT_WIDTH = 10;
-    public final static int POINT_HEIGHT = 10;
-    public final static int OUTLINE_WIDTH = 2;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
 
-    public PlotterPoint(Point point, char color){
-        this.point = point;
-        this.dimension = new Dimension(POINT_WIDTH,POINT_HEIGHT);
+public class PlotterPoint {
 
-        switch(color){
-        case 'B':
-        case 'b':
-            this.color =  Color.BLUE;
-            break;
-        case 'R':
-        case 'r':
-            this.color = Color.RED;
-            break;
-        case 'Y':
-        case 'y':
-            this.color = Color.YELLOW;
-            break;
-        case 'O':
-        case 'o':
-            this.color = Color.ORANGE;
-            break;
-        case 'P':
-        case 'p':
-            this.color = Color.PINK;
-            break;
-        case 'M':
-        case 'm':
-            this.color = Color.MAGENTA;
-            break;
-        case 'G':
-        case 'g':
-            this.color = Color.GREEN;
-            break;
-        case 'C':
-        case 'c':
-            this.color = Color.CYAN;
-            break;
-        case 'E':
-        case 'e':
-            this.color = Color.GRAY;
-            break;
+    // display constants
+    public static final int POINT_WIDTH   = 10;
+    public static final int POINT_HEIGHT  = 10;
+    public static final int OUTLINE_WIDTH = 2;
 
-        case 'K':
-        case 'k':
-        default:
-            this.color = Color.BLACK;
-            break;
+    // trailing alpha (out of 255)
+    private static final int TRAIL_ALPHA = 64;
+
+    // state
+    private Point     point;
+    private Dimension dimension;
+    private Color     color;
+
+    // constructor — maps char color label to AWT Color
+    public PlotterPoint(Point point, char color) {
+        this.point     = point;
+        this.dimension = new Dimension(POINT_WIDTH, POINT_HEIGHT);
+
+        switch (Character.toLowerCase(color)) {
+            case 'b': this.color = Color.BLUE;    break;
+            case 'r': this.color = Color.RED;     break;
+            case 'y': this.color = Color.YELLOW;  break;
+            case 'o': this.color = Color.ORANGE;  break;
+            case 'p': this.color = Color.PINK;    break;
+            case 'm': this.color = Color.MAGENTA; break;
+            case 'g': this.color = Color.GREEN;   break;
+            case 'c': this.color = Color.CYAN;    break;
+            case 'e': this.color = Color.GRAY;    break;
+            case 'k':
+            default:  this.color = Color.BLACK;   break;
         }
     }
 
+    // draws point with solid fill and outline
     public void drawPoint(Graphics2D g) {
-        this.drawPoint(g,false);
+        this.drawPoint(g, false);
     }
-    public void drawPoint(Graphics2D g, boolean trailing){
 
-        if(!trailing) {
-            if (!this.color.equals(Color.black))
-                g.setColor(Color.black);
-            else
-                g.setColor(Color.white);
+    // draws point — trailing renders as translucent fill with no outline
+    public void drawPoint(Graphics2D g, boolean trailing) {
+        if (!trailing) {
+            // outline color contrasts with fill
+            g.setColor(color.equals(Color.black) ? Color.white : Color.black);
             g.setStroke(new BasicStroke(OUTLINE_WIDTH));
             g.drawRect(point.x, point.y, dimension.width, dimension.height);
-
-            //if(Plotter.DEBUG)
-            //    g.drawString("("+point.x/POINT_WIDTH+","+point.y/POINT_HEIGHT+")",point.x,point.y);
         }
 
-        g.setColor(trailing ? new Color(this.color.getRed(),this.color.getGreen(),this.color.getBlue(),alpha) : this.color);
-        g.fillRect(point.x,point.y,dimension.width,dimension.height);
+        Color fillColor = trailing
+            ? new Color(color.getRed(), color.getGreen(), color.getBlue(), TRAIL_ALPHA)
+            : color;
+
+        g.setColor(fillColor);
+        g.fillRect(point.x, point.y, dimension.width, dimension.height);
     }
 
-    public String toString(){
-        return ""+point.x+" "+point.y+" "+color;
+    // --- display ---
+
+    @Override
+    public String toString() {
+        return point.x + " " + point.y + " " + color;
     }
 }

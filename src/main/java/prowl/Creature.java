@@ -1,161 +1,165 @@
+/**
+ * @file Creature.java
+ * @brief Abstract base class for all creatures in the Prowl simulation.
+ *        Defines shared state (position, direction, color, health),
+ *        movement logic, and the interface all subclasses must implement.
+ *
+ * Grid direction reference:
+ *   NORTH (0) → y-1
+ *   EAST  (1) → x+1
+ *   SOUTH (2) → y+1
+ *   WEST  (3) → x-1
+ */
 package prowl;
+
 import java.util.Random;
 
 public abstract class Creature {
-    
-    public final static int NORTH = 0;
-    public final static int EAST = 1;
-    public final static int SOUTH = 2;
-    public final static int WEST = 3;
-    public final static int NUM_DIRS = 4;
-    public final static int[] DIRS = {NORTH,EAST,SOUTH,WEST};
 
+    // directions
+    public static final int NORTH    = 0;
+    public static final int EAST     = 1;
+    public static final int SOUTH    = 2;
+    public static final int WEST     = 3;
+    public static final int NUM_DIRS = 4;
+    public static final int[] DIRS   = { NORTH, EAST, SOUTH, WEST };
 
-    //Use the index of the direction to determine how to add to a row or column
-    //For example, if NORTH (index 0), the we subtract 1 from Y, and add 0 to X
-    //direction
-    protected final int[] dirY = {-1,0,1,0};
-    protected final int[] dirX = {0, 1, 0, -1};
+    // direction delta tables indexed by NORTH/EAST/SOUTH/WEST
+    protected final int[] dirY = { -1,  0,  1,  0 };
+    protected final int[] dirX = {  0,  1,  0, -1 };
 
+    // point color labels
+    public static final char LAB_BLACK   = 'k';
+    public static final char LAB_BLUE    = 'b';
+    public static final char LAB_RED     = 'r';
+    public static final char LAB_YELLOW  = 'y';
+    public static final char LAB_ORANGE  = 'o';
+    public static final char LAB_PINK    = 'p';
+    public static final char LAB_MAGENTA = 'm';
+    public static final char LAB_CYAN    = 'c';
+    public static final char LAB_GREEN   = 'g';
+    public static final char LAB_GRAY    = 'e';
 
-    //Point Colors -- handy contests to use to make your code more readiable
-    public final static char LAB_BLACK='k';
-    public final static char LAB_BLUE='b';
-    public final static char LAB_RED='r';
-    public final static char LAB_YELLOW='y';
-    public final static char LAB_ORANGE='o';
-    public final static char LAB_PINK='p';
-    public final static char LAB_MAGENTA='m';
-    public final static char LAB_CYAN='c';
-    public final static char LAB_GREEN='g';
-    public final static char LAB_GRAY='e';
+    // grid bounds (must match City and Plotter)
+    private static final int GRID_SIZE = 80;
 
-
-    //current direction facing
-    private int dir;
-
-    //current point in grid
+    // state
+    private int       dir;
     private GridPoint point;
+    protected char    lab;
+    protected boolean dead    = false;
+    protected int     stepLen;
 
-    //current color label for the point
-    protected char lab;
-
-    //random instance
+    // dependencies
     protected Random rand;
-
-    //City in which this creature lives so that it can update it's
-    //location and get other information it might need (like the
-    //location of other creatures) when making decisions.    
-    protected City city;
-
-    //boolean to set when this creature is dead
-    protected boolean dead = false;
-
-    //how wide the steps are
-    protected int stepLen;
+    protected City   city;
 
     // constructor
-    public Creature(int x, int y, City cty, Random rnd) {
-        point = new GridPoint(x,y);
-        city = cty;
-        rand = rnd;
-        dir = rand.nextInt(NUM_DIRS);
-        dead = false;
+    public Creature(int x, int y, City city, Random rand) {
+        this.point = new GridPoint(x, y);
+        this.city  = city;
+        this.rand  = rand;
+        this.dir   = rand.nextInt(NUM_DIRS);
+        this.dead  = false;
     }
 
-    public boolean isDead(){ return dead;}
+    // --- state ---
 
-    
-    //getter/setter methods
-    public int getY(){
-        return point.y;
-    }
-    public int getX(){
-        return point.x;
-    }
-    public GridPoint getGridPoint(){
-        return new GridPoint(point); //return a copy to preseve
-                                     //encapsulation
+    public boolean isDead() {
+        return dead;
     }
 
-    // changes location
-    public void setGridPoint(int x, int y) {
-
-        int tempx = (getX() + x)%80;
-        int tempy = (getY() + y)%80;
-
-        if (tempx < 0) {
-            tempx = 80 + tempx;
-        }
-        if (tempy < 0) {
-            tempy = 80 + tempy;
-        }
-        point.x = tempx;
-        point.y = tempy;
-    }
-
-    //compute the distance to another creature
-    public int dist(Creature c){
-        return point.dist(c.getGridPoint());
-    }
-
-    //make a random turn
-    public void randomTurn() {
-        this.dir = rand.nextInt(4);
-    }
-
-    // when creature gets eaten or dies
-    // specifically used for looping through the creatures
-    // interaction when a cat eats a mouse
+    // marks this creature as dead (used when eaten by a cat)
     public void eaten() {
         dead = true;
     }
 
-    // finds closest creature with the specified char 
+    // --- position ---
+
+    public int getX() {
+        return point.x;
+    }
+
+    public int getY() {
+        return point.y;
+    }
+
+    // returns a defensive copy to preserve encapsulation
+    public GridPoint getGridPoint() {
+        return new GridPoint(point);
+    }
+
+    // moves the creature by (dx, dy), wrapping around grid boundaries
+    public void setGridPoint(int dx, int dy) {
+        int newx = (getX() + dx) % GRID_SIZE;
+        int newy = (getY() + dy) % GRID_SIZE;
+
+        if (newx < 0) newx += GRID_SIZE;
+        if (newy < 0) newy += GRID_SIZE;
+
+        point.x = newx;
+        point.y = newy;
+    }
+
+    // --- direction ---
+
+    public int getDir() {
+        return dir;
+    }
+
+    public void setDir(int dir) {
+        this.dir = dir;
+    }
+
+    // picks a random direction
+    public void randomTurn() {
+        this.dir = rand.nextInt(NUM_DIRS);
+    }
+
+    // --- distance ---
+
+    // returns manhattan distance to another creature
+    public int dist(Creature c) {
+        return point.dist(c.getGridPoint());
+    }
+
+    // returns the index of the closest creature of the given type, or -1 if none found
     public int findClosest(char type) {
         int index = -1;
 
-        for (int i = 0; i < this.city.creatures.size(); i++) {
-            if (this.city.creatures.get(i).getType() == type) {
-                if (index == -1) {
-                    index = i;
-                }
-                else {
-                    if (this.dist(this.city.creatures.get(index)) > this.dist(this.city.creatures.get(i))) {
-                        index = i;
-                    }
-                }
+        for (int i = 0; i < city.creatures.size(); i++) {
+            if (city.creatures.get(i).getType() != type) continue;
+
+            if (index == -1 || this.dist(city.creatures.get(i)) < this.dist(city.creatures.get(index))) {
+                index = i;
             }
         }
+
         return index;
     }
 
-    // overwritten methods
-    public void step() {
-        int newY = stepLen * dirY[this.getDir()];
-        int newX = stepLen * dirX[this.getDir()];
+    // --- simulation ---
 
-        this.setGridPoint(newX, newY);
+    // advances position one step in the current direction
+    public void step() {
+        int dx = stepLen * dirX[this.getDir()];
+        int dy = stepLen * dirY[this.getDir()];
+        this.setGridPoint(dx, dy);
     }
 
     public abstract void takeAction();
 
     public abstract char getType();
 
-    // direction related methods
-    public char getLab(){
+    // --- display ---
+
+    public char getLab() {
         return lab;
     }
-    public void setDir(int dir){
-        this.dir = dir;
-    }
-    public int getDir(){
-        return this.dir;
-    }
-    
-    //To string so you can output a creature to the plotter
+
+    // outputs position and color for the Plotter: "x y lab"
+    @Override
     public String toString() {
-        //output in (x,y) format
-        return ""+this.point.x+" "+this.point.y+" "+lab;
+        return point.x + " " + point.y + " " + lab;
     }
 }

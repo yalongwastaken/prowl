@@ -1,71 +1,75 @@
+/**
+ * @file Simulator.java
+ * @brief Entry point for the Prowl simulation.
+ *        Parses CLI arguments, initializes the city, and runs the
+ *        simulation loop — spawning new creatures at fixed intervals
+ *        and optionally pausing each round in DEBUG mode.
+ *
+ * Usage:
+ *   java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> [randSeed] [--DEBUG]
+ */
 package prowl;
-import java.util.Random;
-import java.util.Scanner;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 public class Simulator {
-	
+
+    // spawn intervals
+    private static final int MOUSE_SPAWN_INTERVAL = 100;
+    private static final int CAT_SPAWN_INTERVAL   = 25;
+
+    // default random seed
+    private static final int DEFAULT_SEED = 100;
+
+    // usage string
+    private static final String USAGE =
+        "java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> [randSeed] [--DEBUG]";
+
     public static void main(String[] args) {
-
-        final String USAGE = "java Simulator numMice numCats numZombieCats rounds [randSeed]";
-
-        boolean DEBUG = false;
-        
-        //parse arguments
-        if(args.length < 4){
+        // validate arguments
+        if (args.length < 4) {
             System.out.println("ERROR: missing arguments");
             System.out.println(USAGE);
             System.exit(1);
         }
-        int numMice = Integer.parseInt(args[0]);
-        int numCats = Integer.parseInt(args[1]);
+
+        // parse required arguments
+        int numMice      = Integer.parseInt(args[0]);
+        int numCats      = Integer.parseInt(args[1]);
         int numZombieCats = Integer.parseInt(args[2]);
-        int rounds = Integer.parseInt(args[3]);
+        int rounds       = Integer.parseInt(args[3]);
 
-        Random rand;
-        if(args.length > 4)
-            rand = new Random(Integer.parseInt(args[4]));
-        else
-            rand = new Random(100);
+        // parse optional arguments
+        Random  rand  = new Random(args.length > 4 ? Integer.parseInt(args[4]) : DEFAULT_SEED);
+        boolean debug = args.length > 5 && args[5].equals("--DEBUG");
 
-        if(args.length > 5 && args[5].equals("--DEBUG")){
-            DEBUG=true;
-        }
+        // initialize city
+        City city  = new City(rand, numMice, numCats, numZombieCats);
+        int  count = 0;
 
-        // Populate city with walls, bunnies, zombies, and mice
-        City city= new City(rand,numMice,numCats,numZombieCats);
-        int count = 0;
-
-        int N = 100;
-        int M = 25;
-
+        // simulation loop
         while (count < rounds) {
             count++;
 
-            // Every N rounds, add a mouse
-            if(count % N == 0){
-                city.addMouse();
-            }
-            
-            //Every M rounds, add a Cat
-            if(count % M == 0){
-                city.addCat();
-            }
-            
+            // periodic spawning
+            if (count % MOUSE_SPAWN_INTERVAL == 0) city.addMouse();
+            if (count % CAT_SPAWN_INTERVAL   == 0) city.addCat();
+
             city.simulate();
-            System.out.println("done "+count);
+            System.out.println("done " + count);
             System.out.flush();
 
-            if(DEBUG){
+            // pause each round in debug mode
+            if (debug) {
                 System.err.print("Enter anything to continue: ");
-                try{
-                    (new BufferedReader(new InputStreamReader(System.in))).readLine();
-                }catch(Exception e){
+                try {
+                    new BufferedReader(new InputStreamReader(System.in)).readLine();
+                } catch (Exception e) {
                     System.exit(1);
                 }
             }
-            
         }
     }
 }

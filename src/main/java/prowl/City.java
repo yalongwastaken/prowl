@@ -1,79 +1,79 @@
+/**
+ * @file City.java
+ * @brief City grid manager for Prowl simulation.
+ *        Maintains the creature list, handles spawning, and steps
+ *        the simulation forward one round at a time.
+ *
+ * Grid reference:
+ *
+ *        (x)
+ *         0 1 2 3 4 5 ... WIDTH
+ *        .----------------...
+ *   (y) 0|           ,--y
+ *       1|      * (3,1)
+ *       2|         ^
+ *       3|         '-x
+ *       .|
+ *    HEIGHT:
+ */
 package prowl;
-import java.util.*;
 
-public class City{
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
 
+public class City {
 
-    //Determine the City Grid based on the size of the Plotter
-    public static final int WIDTH = 80;
+    // grid dimensions (must match Plotter window size)
+    public static final int WIDTH  = 80;
     public static final int HEIGHT = 80;
 
-    
-    // The Grid World for your reference
-    //
-    //        
-    //       (x)
-    //        0 1 2 3 4 5 ... WIDTH
-    //       .----------------...
-    //  (y) 0|           ,--y
-    //      1|      * (3,1) 
-    //      2|         ^    
-    //      3|         '-x
-    //      .|
-    //      .|
-    //      .|       
-    //HEIGHT :
-    //
-
-
-
-    //-------------------------------------
-    //The simulation's Data Structures
-    //
-    public List<Creature> creatures; //list of all creatues
+    // simulation data structures
+    public List<Creature>  creatures;
     public Queue<Creature> creaturesToAdd;
 
-    //Random instance
+    // random instance
     private Random rand;
-    
-    public City(Random rand, int numMice, int numCats, int numZombieCats) {
-        this.rand = rand;
 
-        this.creatures = new LinkedList<Creature>();
-        this.creaturesToAdd = new LinkedList<Creature>();
-        
-        /* Populate mice */
-        for (int i=0; i<numMice; i++) addMouse();
-        for (int i=0; i<numCats; i++) addCat();
-        //for (int i=0; i<numZombieCats; i++) addZombieCat();
+    // constructor
+    public City(Random rand, int numMice, int numCats, int numZombieCats) {
+        this.rand           = rand;
+        this.creatures      = new LinkedList<>();
+        this.creaturesToAdd = new LinkedList<>();
+
+        // populate initial creatures
+        for (int i = 0; i < numMice; i++) addMouse();
+        for (int i = 0; i < numCats;  i++) addCat();
+        // for (int i = 0; i < numZombieCats; i++) addZombieCat();
+
         addNewCreatures();
-      
     }
 
-
-    //Return the current number of creatures in the simulation
-    public int numCreatures(){
+    // returns the current number of creatures in the simulation
+    public int numCreatures() {
         return creatures.size();
     }
 
-    public void addMouse(){
-        creaturesToAdd.add(new Mouse(rand.nextInt(HEIGHT), rand.nextInt(WIDTH), this,rand));
+    // queues a new mouse at a random position
+    public void addMouse() {
+        creaturesToAdd.add(new Mouse(rand.nextInt(HEIGHT), rand.nextInt(WIDTH), this, rand));
     }
-    
-    public void addCat(){
-        
-        creaturesToAdd.add(new Cat(rand.nextInt(HEIGHT),rand.nextInt(WIDTH),this,rand));
+
+    // queues a new cat at a random position
+    public void addCat() {
+        creaturesToAdd.add(new Cat(rand.nextInt(HEIGHT), rand.nextInt(WIDTH), this, rand));
     }
-    
+
     /*
-    public void addZombieCat(){
-        creaturesToAdd.add(new ZombieCat(rand.nextInt(HEIGHT),rand.nextInt(WIDTH),this,rand));
+    public void addZombieCat() {
+        creaturesToAdd.add(new ZombieCat(rand.nextInt(HEIGHT), rand.nextInt(WIDTH), this, rand));
     }
     */
 
-    //use this method to queue up a create to be added
-    public void addNewCreatures(){
-        while(!creaturesToAdd.isEmpty()){
+    // flushes the spawn queue into the active creature list
+    public void addNewCreatures() {
+        while (!creaturesToAdd.isEmpty()) {
             creatures.add(creaturesToAdd.remove());
         }
     }
@@ -82,43 +82,36 @@ public class City{
         return creatures;
     }
 
-    //You need to realize in your code such that simulate works for
-    //**ALL** levels of simulation, which means you'll need to take
-    //advantage of inheritance and polymorphism.
+    // advances the simulation by one round:
+    // step all creatures → take actions → remove dead → spawn queued → print state
     public void simulate() {
-        //DO NOT EDIT!
-        
-        //You get this one for free, but you need to review this to
-        //understand how to implement your various creatures
+        // move all creatures forward one step
+        for (Creature c : creatures) {
+            c.step();
+        }
 
-        //First, for all creatures ...
-        for(Creature c : creatures){
-            c.step(); 
-        } //move everyone forward one step in simulation
-        
-        //Second, for all cratures ...
-        for(Creature c : creatures){
-            c.takeAction(); 
-        }//take some action based on the new positions
+        // each creature takes an action based on new positions
+        for (Creature c : creatures) {
+            c.takeAction();
+        }
 
-        //Third, for all creatures ...
-        LinkedList<Creature> deadCreatures = new LinkedList<Creature>();
-        for(Creature c: creatures){
-            if(c.isDead()) deadCreatures.add(c);
-        }//find those that are dead after the action is taken
+        // collect dead creatures
+        LinkedList<Creature> deadCreatures = new LinkedList<>();
+        for (Creature c : creatures) {
+            if (c.isDead()) deadCreatures.add(c);
+        }
 
-        //Four, for all creatures ...
-        for(Creature c: deadCreatures){
+        // remove dead creatures
+        for (Creature c : deadCreatures) {
             creatures.remove(c);
-        }//remove any creatures that are dead
-        
-        //Five, add in any new creatures that have been added before ...
+        }
+
+        // flush spawn queue
         addNewCreatures();
 
-        //Five, for all creatures
-        for(Creature c : creatures){
+        // print current state for Plotter
+        for (Creature c : creatures) {
             System.out.println(c);
-        }//print out all creatures
-
+        }
     }
 }
