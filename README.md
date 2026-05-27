@@ -32,9 +32,7 @@ prowl/
 ├── lib/
 │   ├── Plotter.jar              — visualization tool (reads stdout)
 │   └── junit-platform-console-standalone-1.7.0-M1.jar
-├── work/                        — compiled output (gitignored)
-├── docs/
-│   └── uml_diagram.png          — class diagram
+├── work/                        — compiled output
 ├── .gitignore
 └── README.md
 ```
