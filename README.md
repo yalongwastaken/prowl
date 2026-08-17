@@ -4,6 +4,8 @@ A grid-based predator/prey simulation written in Java. Cats hunt mice across a c
 
 Built as an OOP exercise exploring abstract classes, inheritance, and simulation design.
 
+> **Status: complete.**
+
 ## How It Works
 
 The simulation runs on a 2D city grid populated with three creature types:
@@ -14,7 +16,7 @@ The simulation runs on a 2D city grid populated with three creature types:
 
 Every N rounds a new mouse spawns. Every M rounds a new cat spawns. The simulation runs until the specified number of rounds is complete.
 
-## File Structure
+## Repository Structure
 
 ```
 prowl/
@@ -49,7 +51,7 @@ GridPoint     — represents a position on the grid
 Simulator     — entry point, parses args and runs the loop
 ```
 
-## Prerequisites
+## Requirements
 
 Install Java via Homebrew if you don't have it:
 
@@ -67,7 +69,7 @@ java -version
 javac -version
 ```
 
-## Running It
+## Building and Running
 
 ### Compile
 
@@ -77,13 +79,13 @@ From the repo root:
 javac -cp lib/junit-platform-console-standalone-1.7.0-M1.jar -d work src/main/java/prowl/*.java src/test/java/prowl/Tester.java
 ```
 
-### Run without visualization
+### Run Without Visualization
 
 ```bash
 java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> [randSeed] [--DEBUG]
 ```
 
-### Run with visualization
+### Run With Visualization
 
 Pipe output into the Plotter:
 
@@ -91,7 +93,7 @@ Pipe output into the Plotter:
 java -cp work prowl.Simulator <numMice> <numCats> <numZombieCats> <rounds> | java -jar lib/Plotter.jar
 ```
 
-### Run tests
+### Run Tests
 
 ```bash
 java -cp work:lib/junit-platform-console-standalone-1.7.0-M1.jar org.junit.runner.JUnitCore Tester
@@ -129,6 +131,8 @@ java -cp work prowl.Simulator 10 3 2 500 42 --DEBUG
 - Compiled `.class` files go into `work/` and are excluded from the repo via `.gitignore`
 - Tests 1–5 check OOP structure via file scanning; tests 6–10 validate simulation output against expected values
 
-## Status
+## Author
 
-Completed coursework project (Fall 2023). Kept as an early example of Java OOP — abstract classes, inheritance, and simulation architecture.
+**Anthony Yalong**
+- Email: yalong.anthony123@gmail.com
+- GitHub: [@yalongwastaken](https://github.com/yalongwastaken)
